@@ -1,0 +1,27 @@
+{
+  "name": "custom-cdk-constructs",
+  "version": "1.0.0",
+  "description": "A project to define custom AWS CDK constructs in TypeScript",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-apigateway": "^1.203.0",
+    "@aws-cdk/aws-applicationautoscaling": "^1.203.0",
+    "@aws-cdk/aws-autoscaling": "^1.203.0",
+    "@aws-cdk/aws-cloudwatch": "^1.203.0",
+    "@aws-cdk/aws-dynamodb": "^1.203.0",
+    "@aws-cdk/aws-lambda": "^1.203.0",
+    "@aws-cdk/core": "^1.203.0"
+  },
+  "devDependencies": {
+    "aws-cdk": "^1.203.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
