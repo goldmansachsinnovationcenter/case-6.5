@@ -1,0 +1,187 @@
+openapi: 3.0.0
+info:
+  title: Address Book API
+  version: 1.2.0
+  description: API for managing contacts in an address book
+
+paths:
+  /contacts:
+    get:
+      summary: List all contacts
+      parameters:
+        - name: search
+          in: query
+          description: Full-text search across all contact fields (firstName, lastName, nickname, email, phoneNumber, birthday)
+          required: false
+          schema:
+            type: string
+            example: "Alice"
+      responses:
+        '200':
+          description: A list of matching contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'
+
+    post:
+      summary: Add a new contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactInput'
+      responses:
+        '201':
+          description: Contact created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+
+  /contacts/{id}:
+    get:
+      summary: Get a contact by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The contact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '404':
+          description: Contact not found
+
+    put:
+      summary: Update a contact by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactInput'
+      responses:
+        '200':
+          description: Updated contact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '404':
+          description: Contact not found
+
+    delete:
+      summary: Delete a contact by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Contact deleted
+        '404':
+          description: Contact not found
+
+components:
+  schemas:
+    Contact:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        firstName:
+          type: string
+          example: "Alice"
+        lastName:
+          type: string
+          example: "Johnson"
+        nickname:
+          type: string
+          nullable: true
+          example: "AJ"
+        phoneNumber:
+          type: string
+          pattern: "^\\+?[1-9]\\d{1,14}$"
+          example: "+12065550123"
+        email:
+          type: string
+          format: email
+          example: "alice@example.com"
+        birthday:
+          $ref: '#/components/schemas/PartialDate'
+      required:
+        - id
+        - firstName
+        - lastName
+
+    ContactInput:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: "Alice"
+        lastName:
+          type: string
+          example: "Johnson"
+        nickname:
+          type: string
+          nullable: true
+          example: "AJ"
+        phoneNumber:
+          type: string
+          pattern: "^\\+?[1-9]\\d{1,14}$"
+          example: "+12065550123"
+        email:
+          type: string
+          format: email
+          example: "alice@example.com"
+        birthday:
+          $ref: '#/components/schemas/PartialDate'
+      required:
+        - firstName
+        - lastName
+
+    PartialDate:
+      type: object
+      description: A date with optional year (e.g., for birthday without age)
+      properties:
+        year:
+          type: integer
+          minimum: 1900
+          maximum: 2100
+          example: 1990
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+          example: 7
+        day:
+          type: integer
+          minimum: 1
+          maximum: 31
+          example: 15
+      required:
+        - month
+        - day
