@@ -18,13 +18,31 @@ export class AddressBookStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_14_X,
       handler: 'index.handler',
       code: lambda.Code.fromInline(`
+        const AWS = require('aws-sdk');
+        const dynamodb = new AWS.DynamoDB.DocumentClient();
+        
         exports.handler = async function(event) {
           console.log('List contacts request:', JSON.stringify(event));
-          return {
-            statusCode: 200,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify([{ id: '123', firstName: 'John', lastName: 'Doe' }])
+          
+          const params = {
+            TableName: process.env.TABLE_NAME
           };
+          
+          try {
+            const result = await dynamodb.scan(params).promise();
+            return {
+              statusCode: 200,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(result.Items || [])
+            };
+          } catch (error) {
+            console.error('DynamoDB error:', error);
+            return {
+              statusCode: 500,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: 'Error fetching contacts' })
+            };
+          }
         };
       `),
       environment: {
@@ -36,14 +54,42 @@ export class AddressBookStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_14_X,
       handler: 'index.handler',
       code: lambda.Code.fromInline(`
+        const AWS = require('aws-sdk');
+        const dynamodb = new AWS.DynamoDB.DocumentClient();
+        
         exports.handler = async function(event) {
           console.log('Get contact request:', JSON.stringify(event));
           const id = event.pathParameters.id;
-          return {
-            statusCode: 200,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, firstName: 'John', lastName: 'Doe' })
+          
+          const params = {
+            TableName: process.env.TABLE_NAME,
+            Key: { id }
           };
+          
+          try {
+            const result = await dynamodb.get(params).promise();
+            
+            if (!result.Item) {
+              return {
+                statusCode: 404,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'Contact not found' })
+              };
+            }
+            
+            return {
+              statusCode: 200,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(result.Item)
+            };
+          } catch (error) {
+            console.error('DynamoDB error:', error);
+            return {
+              statusCode: 500,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: 'Error fetching contact' })
+            };
+          }
         };
       `),
       environment: {
@@ -55,15 +101,40 @@ export class AddressBookStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_14_X,
       handler: 'index.handler',
       code: lambda.Code.fromInline(`
+        const AWS = require('aws-sdk');
+        const dynamodb = new AWS.DynamoDB.DocumentClient();
+        
         exports.handler = async function(event) {
           console.log('Create contact request:', JSON.stringify(event));
           const body = JSON.parse(event.body);
           const id = 'contact-' + Date.now();
-          return {
-            statusCode: 201,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, ...body })
+          
+          const item = {
+            id,
+            ...body,
+            createdAt: new Date().toISOString()
           };
+          
+          const params = {
+            TableName: process.env.TABLE_NAME,
+            Item: item
+          };
+          
+          try {
+            await dynamodb.put(params).promise();
+            return {
+              statusCode: 201,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(item)
+            };
+          } catch (error) {
+            console.error('DynamoDB error:', error);
+            return {
+              statusCode: 500,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: 'Error creating contact' })
+            };
+          }
         };
       `),
       environment: {
@@ -75,15 +146,49 @@ export class AddressBookStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_14_X,
       handler: 'index.handler',
       code: lambda.Code.fromInline(`
+        const AWS = require('aws-sdk');
+        const dynamodb = new AWS.DynamoDB.DocumentClient();
+        
         exports.handler = async function(event) {
           console.log('Update contact request:', JSON.stringify(event));
           const id = event.pathParameters.id;
           const body = JSON.parse(event.body);
-          return {
-            statusCode: 200,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, ...body })
+          
+          const updateExpressions = [];
+          const expressionAttributeValues = {
+            ':updatedAt': new Date().toISOString()
           };
+          
+          Object.keys(body).forEach((key, index) => {
+            updateExpressions.push(\`\${key} = :val\${index}\`);
+            expressionAttributeValues[\`:val\${index}\`] = body[key];
+          });
+          
+          updateExpressions.push('updatedAt = :updatedAt');
+          
+          const params = {
+            TableName: process.env.TABLE_NAME,
+            Key: { id },
+            UpdateExpression: 'SET ' + updateExpressions.join(', '),
+            ExpressionAttributeValues: expressionAttributeValues,
+            ReturnValues: 'ALL_NEW'
+          };
+          
+          try {
+            const result = await dynamodb.update(params).promise();
+            return {
+              statusCode: 200,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(result.Attributes)
+            };
+          } catch (error) {
+            console.error('DynamoDB error:', error);
+            return {
+              statusCode: 500,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: 'Error updating contact' })
+            };
+          }
         };
       `),
       environment: {
@@ -95,14 +200,33 @@ export class AddressBookStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_14_X,
       handler: 'index.handler',
       code: lambda.Code.fromInline(`
+        const AWS = require('aws-sdk');
+        const dynamodb = new AWS.DynamoDB.DocumentClient();
+        
         exports.handler = async function(event) {
           console.log('Delete contact request:', JSON.stringify(event));
           const id = event.pathParameters.id;
-          return {
-            statusCode: 204,
-            headers: { 'Content-Type': 'application/json' },
-            body: ''
+          
+          const params = {
+            TableName: process.env.TABLE_NAME,
+            Key: { id }
           };
+          
+          try {
+            await dynamodb.delete(params).promise();
+            return {
+              statusCode: 204,
+              headers: { 'Content-Type': 'application/json' },
+              body: ''
+            };
+          } catch (error) {
+            console.error('DynamoDB error:', error);
+            return {
+              statusCode: 500,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: 'Error deleting contact' })
+            };
+          }
         };
       `),
       environment: {
