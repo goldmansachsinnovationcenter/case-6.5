@@ -1,0 +1,9 @@
+{
+  "name": "log-helper",
+  "version": "1.0.0",
+  "description": "Helper functions for Lambda functions to interact with CloudWatch Logs",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "^2.1692.0"
+  }
+}
