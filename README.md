@@ -46,11 +46,15 @@ npx cdk deploy
 - `npx cdk diff` - Compare deployed stack with current state
 - `npx cdk deploy` - Deploy this stack to your default AWS account/region
 
-## Custom Lambda Construct with Log Group Capabilities
+## Custom Constructs
 
-This project includes a custom AWS CDK construct that uses the L2 Lambda construct (lambda.Function) with enhanced logging capabilities. The `LambdaWithLogs` construct creates a Lambda function with a dedicated CloudWatch log group and provides helper functions for reading and writing logs.
+This project includes several custom AWS CDK constructs that extend the L2 AWS CDK constructs with enhanced capabilities.
 
-### Usage
+### LambdaWithLogs Construct
+
+This custom construct uses the L2 Lambda construct (lambda.Function) with enhanced logging capabilities. The `LambdaWithLogs` construct creates a Lambda function with a dedicated CloudWatch log group and provides helper functions for reading and writing logs.
+
+#### Usage
 
 ```typescript
 import * as cdk from 'aws-cdk-lib';
@@ -82,7 +86,7 @@ myLambda.lambdaFunction.addPermission('InvokePermission', {
 });
 ```
 
-### Features
+#### Features
 
 - Uses L2 AWS CDK Lambda construct (lambda.Function) for better integration with other CDK components
 - Automatically creates a dedicated CloudWatch log group with configurable retention
@@ -90,4 +94,112 @@ myLambda.lambdaFunction.addPermission('InvokePermission', {
 - Configures necessary IAM permissions for log access
 - Maintains all the capabilities of the standard L2 Lambda construct
 
-See the examples directory for a complete example of how to use the `LambdaWithLogs` construct.
+### SecureS3Bucket Construct
+
+This custom construct extends the L2 S3 construct (s3.Bucket) with enhanced security features. The `SecureS3Bucket` construct creates an S3 bucket with blocked public access and encryption enabled by default.
+
+#### Usage
+
+```typescript
+import * as cdk from 'aws-cdk-lib';
+import * as kms from 'aws-cdk-lib/aws-kms';
+import { SecureS3Bucket } from './lib/constructs/secure-s3-bucket';
+
+// Create an S3 bucket with S3-managed encryption
+const basicSecureBucket = new SecureS3Bucket(this, 'BasicSecureBucket', {
+  bucketName: 'my-secure-bucket',
+  versioned: true,
+});
+
+// Create an S3 bucket with a new customer-managed KMS key
+const advancedSecureBucket = new SecureS3Bucket(this, 'AdvancedSecureBucket', {
+  bucketName: 'my-advanced-secure-bucket',
+  useCustomerManagedKey: true,
+});
+
+// Create an S3 bucket with an existing KMS key
+const existingKey = new kms.Key(this, 'ExistingKey', {
+  enableKeyRotation: true,
+  description: 'KMS key for S3 bucket encryption',
+});
+
+const customKeyBucket = new SecureS3Bucket(this, 'CustomKeyBucket', {
+  bucketName: 'my-custom-key-bucket',
+  encryptionKey: existingKey,
+});
+
+// Access the S3 bucket and encryption key
+const bucketArn = basicSecureBucket.bucket.bucketArn;
+const encryptionKeyArn = advancedSecureBucket.encryptionKey?.keyArn;
+```
+
+#### Features
+
+- Uses L2 AWS CDK S3 construct (s3.Bucket) for better integration with other CDK components
+- Automatically blocks all public access to the bucket
+- Enforces encryption using either S3-managed keys or customer-managed KMS keys
+- Enforces SSL for bucket access
+- Provides options for using existing KMS keys or creating new ones
+- Maintains all the capabilities of the standard L2 S3 construct
+
+### LambdaWithVpc Construct
+
+This custom construct extends the L2 Lambda construct with VPC integration and enhanced logging capabilities. The `LambdaWithVpc` construct creates a Lambda function that runs within a VPC and has a dedicated CloudWatch log group.
+
+#### Usage
+
+```typescript
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as logs from 'aws-cdk-lib/aws-logs';
+import * as path from 'path';
+import { LambdaWithVpc } from './lib/constructs/lambda-with-vpc';
+
+// Create a Lambda function with a new VPC
+const lambdaWithNewVpc = new LambdaWithVpc(this, 'LambdaWithNewVpc', {
+  functionName: 'lambda-with-new-vpc',
+  runtime: lambda.Runtime.NODEJS_18_X,
+  handler: 'index.handler',
+  code: lambda.Code.fromAsset(path.join(__dirname, 'lambda-code')),
+  logRetention: logs.RetentionDays.ONE_WEEK,
+});
+
+// Create a Lambda function with an existing VPC
+const existingVpc = new ec2.Vpc(this, 'ExistingVpc', {
+  maxAzs: 2,
+  natGateways: 1,
+});
+
+const securityGroup = new ec2.SecurityGroup(this, 'SecurityGroup', {
+  vpc: existingVpc,
+  description: 'Security group for Lambda function',
+  allowAllOutbound: true,
+});
+
+const lambdaWithExistingVpc = new LambdaWithVpc(this, 'LambdaWithExistingVpc', {
+  functionName: 'lambda-with-existing-vpc',
+  runtime: lambda.Runtime.NODEJS_18_X,
+  handler: 'index.handler',
+  code: lambda.Code.fromAsset(path.join(__dirname, 'lambda-code')),
+  vpc: existingVpc,
+  securityGroups: [securityGroup],
+  vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+});
+
+// Access the Lambda function, VPC, and security groups
+const lambdaArn = lambdaWithExistingVpc.lambdaFunction.functionArn;
+const vpcId = lambdaWithExistingVpc.vpc.vpcId;
+const securityGroupId = lambdaWithExistingVpc.securityGroups[0].securityGroupId;
+```
+
+#### Features
+
+- Uses L2 AWS CDK Lambda construct (lambda.Function) for better integration with other CDK components
+- Automatically creates a new VPC if one is not provided
+- Configures security groups for the Lambda function
+- Creates a dedicated CloudWatch log group with configurable retention
+- Provides necessary IAM permissions for VPC access and logging
+- Maintains all the capabilities of the standard L2 Lambda construct
+
+See the examples directory for complete examples of how to use these custom constructs.
