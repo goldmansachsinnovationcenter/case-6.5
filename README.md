@@ -2,9 +2,52 @@
 
 This project implements a serverless Address Book API using AWS CDK with custom constructs. The implementation provides a complete backend solution for managing contacts with automated deployment, monitoring, and scaling capabilities.
 
+## Architecture Diagram
+
+```
++------------------------------------------+
+|                                          |
+|            AWS Cloud                     |
+|                                          |
+|  +-------------+      +--------------+   |
+|  |             |      |              |   |
+|  | API Gateway +----->+ Lambda       |   |
+|  |             |      | Functions    |   |
+|  +------+------+      +------+-------+   |
+|         ^                     |          |
+|         |                     v          |
+|  +------+------+      +--------------+   |
+|  |             |      |              |   |
+|  | CloudWatch  |      | DynamoDB     |   |
+|  | Alarms      |      | Table        |   |
+|  |             |      |              |   |
+|  +-------------+      +--------------+   |
+|                                          |
++------------------------------------------+
+```
+
+### Component Interactions
+
+1. **Client → API Gateway**: 
+   - Clients make HTTP requests to the API Gateway endpoints
+   - Endpoints: /contacts (GET, POST), /contacts/{id} (GET, PUT, DELETE)
+
+2. **API Gateway → Lambda Functions**:
+   - API Gateway routes requests to the appropriate Lambda function
+   - Each endpoint is mapped to a specific Lambda function
+
+3. **Lambda Functions → DynamoDB**:
+   - Lambda functions perform CRUD operations on the DynamoDB table
+   - Functions use AWS SDK to interact with DynamoDB
+
+4. **CloudWatch Monitoring**:
+   - API Gateway and Lambda metrics are sent to CloudWatch
+   - CloudWatch Alarms trigger based on predefined thresholds
+   - Auto Scaling adjusts Lambda provisioned concurrency based on utilization
+
 ## Implementation Details
 
-### Architecture
+### Architecture Components
 - **AWS CDK**: Infrastructure as Code using TypeScript
 - **Custom Construct**: Reusable CDK construct for the Address Book API
 - **API Gateway**: RESTful API endpoints
