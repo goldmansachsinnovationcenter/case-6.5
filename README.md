@@ -202,4 +202,81 @@ const securityGroupId = lambdaWithExistingVpc.securityGroups[0].securityGroupId;
 - Provides necessary IAM permissions for VPC access and logging
 - Maintains all the capabilities of the standard L2 Lambda construct
 
+### CombinedLambda Construct
+
+This custom construct combines the capabilities of both `LambdaWithLogs` and `LambdaWithVpc` constructs. The `CombinedLambda` construct creates a Lambda function that can have both logging capabilities and VPC integration, with the flexibility to enable or disable VPC integration as needed.
+
+#### Usage
+
+```typescript
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as logs from 'aws-cdk-lib/aws-logs';
+import * as path from 'path';
+import { CombinedLambda } from './lib/constructs/combined-lambda';
+
+// Example 1: Create a Lambda function with a new VPC and logging
+const lambdaWithNewVpc = new CombinedLambda(this, 'LambdaWithNewVpc', {
+  functionName: 'example-combined-lambda-new-vpc',
+  runtime: lambda.Runtime.NODEJS_18_X,
+  handler: 'index.handler',
+  code: lambda.Code.fromAsset(path.join(__dirname, 'lambda-code')),
+  logRetention: logs.RetentionDays.TWO_WEEKS,
+  memorySize: 256,
+  timeout: cdk.Duration.seconds(60),
+  description: 'Example Lambda function with logging and VPC integration',
+});
+
+// Example 2: Create a Lambda function with an existing VPC and logging
+const existingVpc = new ec2.Vpc(this, 'ExistingVpc', {
+  maxAzs: 2,
+  natGateways: 1,
+});
+
+const securityGroup = new ec2.SecurityGroup(this, 'SecurityGroup', {
+  vpc: existingVpc,
+  description: 'Security group for Lambda function',
+  allowAllOutbound: true,
+});
+
+const lambdaWithExistingVpc = new CombinedLambda(this, 'LambdaWithExistingVpc', {
+  functionName: 'example-combined-lambda-existing-vpc',
+  runtime: lambda.Runtime.NODEJS_18_X,
+  handler: 'index.handler',
+  code: lambda.Code.fromAsset(path.join(__dirname, 'lambda-code')),
+  vpc: existingVpc,
+  securityGroups: [securityGroup],
+  vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+  logRetention: logs.RetentionDays.ONE_MONTH,
+});
+
+// Example 3: Create a Lambda function with only logging (no VPC)
+const lambdaWithLogsOnly = new CombinedLambda(this, 'LambdaWithLogsOnly', {
+  functionName: 'example-combined-lambda-logs-only',
+  runtime: lambda.Runtime.NODEJS_18_X,
+  handler: 'index.handler',
+  code: lambda.Code.fromAsset(path.join(__dirname, 'lambda-code')),
+  logRetention: logs.RetentionDays.ONE_WEEK,
+  createVpc: false,
+});
+
+// Access the Lambda function, log group, VPC, and security groups
+const lambdaArn = lambdaWithNewVpc.lambdaFunction.functionArn;
+const logGroupArn = lambdaWithNewVpc.logGroup.logGroupArn;
+const vpcId = lambdaWithNewVpc.vpc?.vpcId;
+const securityGroupId = lambdaWithNewVpc.securityGroups?.[0].securityGroupId;
+```
+
+#### Features
+
+- Combines the capabilities of both `LambdaWithLogs` and `LambdaWithVpc` constructs
+- Uses L2 AWS CDK Lambda construct (lambda.Function) for better integration with other CDK components
+- Provides flexible configuration options to enable or disable VPC integration
+- Automatically creates a new VPC if one is not provided and VPC integration is enabled
+- Configures security groups for the Lambda function when VPC integration is enabled
+- Creates a dedicated CloudWatch log group with configurable retention
+- Provides necessary IAM permissions for VPC access (when enabled) and logging
+- Maintains all the capabilities of the standard L2 Lambda construct
+
 See the examples directory for complete examples of how to use these custom constructs.
