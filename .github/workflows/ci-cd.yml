@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, iglema/custom-cdk-constructs ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, iglema/custom-cdk-constructs ]
+    branches: [ main ]
 
 jobs:
   build-and-test:
