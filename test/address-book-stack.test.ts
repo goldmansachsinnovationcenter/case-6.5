@@ -1,9 +1,10 @@
-import * as cdk from '@aws-cdk/core';
-import { Stack } from '@aws-cdk/core';
+import * as cdk from 'aws-cdk-lib';
+import { Stack } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 import { MyCustomConstruct } from '../src/MyCustomConstruct';
 
 class TestStack extends Stack {
-  constructor(scope: cdk.App, id: string) {
+  constructor(scope: Construct, id: string) {
     super(scope, id);
     new MyCustomConstruct(this, 'MyCustomConstruct');
   }

@@ -1,4 +1,5 @@
-import * as cdk from '@aws-cdk/core';
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 import { MyCustomConstruct } from '../src/MyCustomConstruct';
 
 describe('MyCustomConstruct', () => {
