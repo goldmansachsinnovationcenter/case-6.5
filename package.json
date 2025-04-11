@@ -12,21 +12,21 @@
     "cdk": "cdk"
   },
   "dependencies": {
-    "@aws-cdk/aws-apigateway": "^1.203.0",
-    "@aws-cdk/aws-applicationautoscaling": "^1.203.0",
-    "@aws-cdk/aws-autoscaling": "^1.203.0",
-    "@aws-cdk/aws-cloudwatch": "^1.203.0",
-    "@aws-cdk/aws-dynamodb": "^1.203.0",
-    "@aws-cdk/aws-lambda": "^1.203.0",
-    "@aws-cdk/core": "^1.204.0",
-    "aws-sdk": "^2.1488.0"
+    "@aws-cdk/aws-apigateway": "1.203.0",
+    "@aws-cdk/aws-applicationautoscaling": "1.203.0",
+    "@aws-cdk/aws-autoscaling": "1.203.0",
+    "@aws-cdk/aws-cloudwatch": "1.203.0",
+    "@aws-cdk/aws-dynamodb": "1.203.0",
+    "@aws-cdk/aws-lambda": "1.203.0",
+    "@aws-cdk/core": "1.203.0",
+    "aws-sdk": "2.1488.0"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "^1.203.0",
+    "@aws-cdk/assert": "1.203.0",
     "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "aws-cdk": "^1.203.0",
+    "aws-cdk": "1.203.0",
     "eslint": "^8.0.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.3.1",
