@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, iglema/custom-cdk-constructs ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, iglema/custom-cdk-constructs ]
 
 jobs:
   build-and-test:
@@ -36,7 +36,7 @@ jobs:
       
   deploy:
     needs: build-and-test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/iglema/custom-cdk-constructs')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     
     steps:
