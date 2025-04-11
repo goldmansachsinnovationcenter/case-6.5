@@ -27,16 +27,16 @@ export class LambdaWithLogsExampleStack extends cdk.Stack {
     });
     
     new cdk.CfnOutput(this, 'LambdaFunctionArn', {
-      value: exampleLambda.lambdaFunction.functionArn,
+      value: exampleLambda.functionArn,
       description: 'ARN of the Lambda function',
     });
     
     new cdk.CfnOutput(this, 'LogGroupArn', {
-      value: exampleLambda.logGroup.logGroupArn,
+      value: exampleLambda.customLogGroup.logGroupArn,
       description: 'ARN of the CloudWatch log group',
     });
     
-    exampleLambda.lambdaFunction.addPermission('InvokePermission', {
+    exampleLambda.addPermission('InvokePermission', {
       principal: new cdk.aws_iam.ServicePrincipal('apigateway.amazonaws.com'),
       action: 'lambda:InvokeFunction',
     });

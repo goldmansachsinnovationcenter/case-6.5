@@ -91,29 +91,29 @@ export class LambdaApi extends Construct {
         CONTACTS_TABLE_NAME: props.contactsTable.tableName,
       },
     });
-    props.contactsTable.grantReadWriteData(createContactLambda.lambdaFunction);
-    props.contactsTable.grantReadWriteData(getContactLambda.lambdaFunction);
-    props.contactsTable.grantReadWriteData(listContactsLambda.lambdaFunction);
-    props.contactsTable.grantReadWriteData(updateContactLambda.lambdaFunction);
-    props.contactsTable.grantReadWriteData(deleteContactLambda.lambdaFunction);
-    props.contactsTable.grantReadWriteData(searchContactsLambda.lambdaFunction);
+    props.contactsTable.grantReadWriteData(createContactLambda);
+    props.contactsTable.grantReadWriteData(getContactLambda);
+    props.contactsTable.grantReadWriteData(listContactsLambda);
+    props.contactsTable.grantReadWriteData(updateContactLambda);
+    props.contactsTable.grantReadWriteData(deleteContactLambda);
+    props.contactsTable.grantReadWriteData(searchContactsLambda);
 
 
     const contactsResource = this.api.root.addResource('contacts');
     
-    contactsResource.addMethod('GET', new apigateway.LambdaIntegration(listContactsLambda.lambdaFunction));
+    contactsResource.addMethod('GET', new apigateway.LambdaIntegration(listContactsLambda));
     
-    contactsResource.addMethod('POST', new apigateway.LambdaIntegration(createContactLambda.lambdaFunction));
+    contactsResource.addMethod('POST', new apigateway.LambdaIntegration(createContactLambda));
     
     const searchResource = contactsResource.addResource('search');
-    searchResource.addMethod('GET', new apigateway.LambdaIntegration(searchContactsLambda.lambdaFunction));
+    searchResource.addMethod('GET', new apigateway.LambdaIntegration(searchContactsLambda));
     
     const contactResource = contactsResource.addResource('{id}');
     
-    contactResource.addMethod('GET', new apigateway.LambdaIntegration(getContactLambda.lambdaFunction));
+    contactResource.addMethod('GET', new apigateway.LambdaIntegration(getContactLambda));
     
-    contactResource.addMethod('PUT', new apigateway.LambdaIntegration(updateContactLambda.lambdaFunction));
+    contactResource.addMethod('PUT', new apigateway.LambdaIntegration(updateContactLambda));
     
-    contactResource.addMethod('DELETE', new apigateway.LambdaIntegration(deleteContactLambda.lambdaFunction));
+    contactResource.addMethod('DELETE', new apigateway.LambdaIntegration(deleteContactLambda));
   }
 }
