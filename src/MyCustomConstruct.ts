@@ -1,14 +1,15 @@
-import * as cdk from '@aws-cdk/core';
-import * as apigateway from '@aws-cdk/aws-apigateway';
-import * as lambda from '@aws-cdk/aws-lambda';
-import * as dynamodb from '@aws-cdk/aws-dynamodb';
-import * as cloudwatch from '@aws-cdk/aws-cloudwatch';
+import { Construct } from 'constructs';
+import * as cdk from 'aws-cdk-lib';
+import { aws_apigateway as apigateway } from 'aws-cdk-lib';
+import { aws_lambda as lambda } from 'aws-cdk-lib';
+import { aws_dynamodb as dynamodb } from 'aws-cdk-lib';
+import { aws_cloudwatch as cloudwatch } from 'aws-cdk-lib';
 
-export class MyCustomConstruct extends cdk.Construct {
+export class MyCustomConstruct extends Construct {
   public readonly api: apigateway.RestApi;
   public readonly contactsTable: dynamodb.Table;
 
-  constructor(scope: cdk.Construct, id: string) {
+  constructor(scope: Construct, id: string) {
     super(scope, id);
 
     this.contactsTable = new dynamodb.Table(this, 'ContactsTable', {

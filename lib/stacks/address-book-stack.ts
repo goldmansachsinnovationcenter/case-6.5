@@ -1,13 +1,14 @@
-import * as cdk from '@aws-cdk/core';
-import * as apigateway from '@aws-cdk/aws-apigateway';
-import * as lambda from '@aws-cdk/aws-lambda';
-import * as dynamodb from '@aws-cdk/aws-dynamodb';
-import * as cloudwatch from '@aws-cdk/aws-cloudwatch';
-import * as appscaling from '@aws-cdk/aws-applicationautoscaling';
+import { Construct } from 'constructs';
+import * as cdk from 'aws-cdk-lib';
+import { aws_apigateway as apigateway } from 'aws-cdk-lib';
+import { aws_lambda as lambda } from 'aws-cdk-lib';
+import { aws_dynamodb as dynamodb } from 'aws-cdk-lib';
+import { aws_cloudwatch as cloudwatch } from 'aws-cdk-lib';
+import { aws_applicationautoscaling as appscaling } from 'aws-cdk-lib';
 import { MyCustomConstruct } from '../../src/MyCustomConstruct';
 
 export class AddressBookStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const customConstruct = new MyCustomConstruct(this, 'AddressBookCustomConstruct');
